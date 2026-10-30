@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XEROX SPORTS | Next-Gen Athletic Gear & Kits</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        neon: {
+                            cyan: '#00f3ff',
+                            lime: '#00ff66',
+                            magenta: '#ff0055',
+                            purple: '#9d00ff',
+                            gold: '#ffb700'
+                        },
+                        dark: {
+                            900: '#040508',
+                            800: '#0b0e14',
+                            700: '#131822',
+                            600: '#1d2535'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Teko', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #040508;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* ===== Ambient Video Background ===== */
+        .video-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .video-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.45) contrast(1.15) saturate(1.25);
+            transform: scale(1.05);
+        }
+
+        /* Lighter overlay so the video is actually visible behind cards */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at center, rgba(4, 5, 8, 0.15) 0%, rgba(4, 5, 8, 0.72) 100%),
+                        linear-gradient(to bottom, rgba(4, 5, 8, 0.35) 0%, rgba(4, 5, 8, 0.82) 100%);
+            pointer-events: none;
+        }
+
+        /* ===== Glassmorphism (still used by header / panels / modals) ===== */
+        .glass-panel {
+            background: rgba(11, 14, 20, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-panel-neon {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            box-shadow: 0 12px 40px rgba(0, 243, 255, 0.12);
+        }
+
+        /* ===== NEW: Fully transparent product cards (video shows through) ===== */
+        .card-clear {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: none;
+        }
+
+        .card-clear:hover {
+            background: rgba(0, 243, 255, 0.035) !important;
+            border-color: rgba(0, 243, 255, 0.55);
+            box-shadow: 0 20px 40px rgba(0, 243, 255, 0.16), 0 0 25px rgba(0, 243, 255, 0.12);
+        }
+
+        /* Text readability over moving video */
+        .card-clear h3,
+        .card-clear .price-row {
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 3px rgba(0, 0, 0, 0.9);
+        }
+
+        /* 3D Tilt Card Container */
+        .tilt-card-wrapper {
+            perspective: 1000px;
+        }
+
+        .tilt-card {
+            transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease-out, background 0.25s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #040508; }
+        ::-webkit-scrollbar-thumb { background: #1d2535; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+        /* Ticker Marquee */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: flex;
+            width: 200%;
+            animation: marquee 24s linear infinite;
+        }
+        .animate-marquee:hover { animation-play-state: paused; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-neon-cyan selection:text-black">
+
+    <!-- ================= AMBIENT VIDEO BACKGROUND ================= -->
+    <div class="video-bg-container">
+        <video id="bgVideoLoop" class="video-bg" autoplay loop muted playsinline preload="auto"
+               poster="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1920&q=80">
+            <!-- 1) Absolute local path: C:\Users\Ayon\Downloads\New folder\footbalvideo.mp4 -->
+            <source src="file:///C:/Users/Ayon/Downloads/New%20folder/footbalvideo.mp4" type="video/mp4">
+            <!-- 2) Relative fallback (same folder as this HTML file) -->
+            <source src="./footbalvideo.mp4" type="video/mp4">
+            <!-- 3) Bare filename fallback -->
+            <source src="footbalvideo.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="video-overlay"></div>
+
+    <!-- Top Ticker Marquee -->
+    <div class="bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 border-b border-white/10 text-xs py-2 overflow-hidden relative z-40">
+        <div class="animate-marquee whitespace-nowrap flex items-center gap-12 text-gray-300 font-semibold tracking-wider uppercase" id="bannerTicker">
+            <!-- Dynamic Content Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-white/10 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="resetFilters()">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-neon-cyan via-blue-600 to-neon-purple p-[2px] transform group-hover:rotate-6 transition-transform duration-300 shadow-lg shadow-neon-cyan/20">
+                        <div class="w-full h-full bg-dark-900 rounded-[10px] flex items-center justify-center font-display text-2xl font-black text-neon-cyan">
+                            X
+                        </div>
+                    </div>
+                    <div>
+                        <span class="font-display text-3xl font-black tracking-wider text-white group-hover:text-neon-cyan transition-colors">XEROX<span class="text-neon-cyan">SPORTS</span></span>
+                        <span class="block text-[9px] tracking-widest text-gray-400 font-semibold -mt-2 uppercase">Official Authentic Gear</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Search Bar -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
+                    <input type="text" id="searchInput" placeholder="Search jerseys, retro kits, player editions..."
+                        class="w-full bg-dark-800/80 border border-white/10 text-sm rounded-full pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan transition-all">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-500"></i>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleMobileSearch()" class="md:hidden p-2.5 rounded-xl bg-dark-800 text-gray-300 hover:text-neon-cyan">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+
+                    <button onclick="openCart()" class="relative p-2.5 rounded-xl bg-gradient-to-r from-dark-800 to-dark-700 hover:border-neon-cyan border border-white/10 transition-all flex items-center gap-3 group">
+                        <div class="relative">
+                            <i class="fa-solid fa-cart-shopping text-lg text-neon-cyan group-hover:scale-110 transition-transform"></i>
+                            <span id="cartCountBadge" class="absolute -top-2 -right-2.5 bg-neon-magenta text-white font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-dark-900">0</span>
+                        </div>
+                        <div class="hidden sm:block text-left pr-1">
+                            <span class="block text-[10px] uppercase font-bold text-gray-400">Cart Total</span>
+                            <span id="cartTotalHeader" class="block text-xs font-bold text-white">0 BDT</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Search Expanded -->
+            <div id="mobileSearch" class="hidden pb-4 md:hidden">
+                <div class="relative">
+                    <input type="text" id="searchInputMobile" placeholder="Search jerseys, retro kits..."
+                        class="w-full bg-dark-800 border border-white/10 text-sm rounded-full pl-10 pr-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-500"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Promo Section -->
+    <section class="relative py-8 md:py-12 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-panel-neon rounded-3xl p-6 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 border-neon-cyan/30">
+                <div class="space-y-4 max-w-xl text-center md:text-left z-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan text-xs font-bold uppercase tracking-wider">
+                        <i class="fa-solid fa-bolt animate-pulse"></i> XeroxSports Authentic Drop 2026
+                    </div>
+                    <h1 class="font-display text-4xl sm:text-6xl font-black text-white leading-none tracking-wide">
+                        PREMIUM ATHLETIC <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-lime">JERSEYS & KITS</span>
+                    </h1>
+                    <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+                        Player versions, Fan editions & iconic Retro kits with high-breathability mesh, premium embroidery, and official heat-pressed badging.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+                        <a href="#shop" class="px-7 py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-blue-600 text-dark-900 font-extrabold text-sm uppercase tracking-wider hover:brightness-110 shadow-lg shadow-neon-cyan/20 transition-all flex items-center gap-2">
+                            Explore Collection <i class="fa-solid fa-arrow-down"></i>
+                        </a>
+                        <div class="text-xs text-gray-400 font-medium border-l border-white/10 pl-4 py-1">
+                            <span class="text-neon-lime font-bold block text-sm">bKash Verified COD</span>
+                            Dhaka @ 80 BDT | Out of Dhaka @ 150 BDT
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Showcase Tilt Card (transparent) -->
+                <div class="relative w-full md:w-80 h-64 md:h-80 flex items-center justify-center z-10 tilt-card-wrapper">
+                    <div id="heroCard" class="tilt-card card-clear rounded-2xl p-4 flex flex-col justify-between shadow-2xl relative group cursor-pointer" onclick="openProductModal(1)">
+                        <span class="absolute top-3 right-3 bg-neon-magenta text-white font-black text-[10px] px-2 py-1 rounded-full uppercase tracking-wider">Featured</span>
+                        <img id="heroImage" src="https://images.unsplash.com/photo-1577212017184-80cc0da11082?auto=format&fit=crop&w=600&q=80" alt="Hero Kit" class="w-full h-44 object-cover rounded-xl shadow-lg transform group-hover:scale-105 transition-transform duration-500">
+                        <div>
+                            <span class="text-xs text-neon-cyan uppercase font-bold tracking-widest block">Retro Special Edition</span>
+                            <h3 class="font-bold text-white text-base truncate">Real Madrid 2017 Dragon Final Kit</h3>
+                            <div class="flex items-center justify-between mt-1 price-row">
+                                <span class="text-neon-lime font-black text-lg">1,150 BDT</span>
+                                <span class="text-gray-400 text-xs line-through">1,450 BDT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Storefront Catalog -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full" id="shop">
+        <!-- Filter Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 glass-panel p-4 rounded-2xl border border-white/10">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none" id="categoryPills">
+                <!-- Dynamically populated via JS -->
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+                <span class="text-xs text-gray-400 uppercase font-bold tracking-wider"><i class="fa-solid fa-filter text-neon-cyan"></i> Sort:</span>
+                <select id="sortFilter" onchange="applyFilters()" class="bg-dark-800 border border-white/10 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-neon-cyan">
+                    <option value="featured">Featured First</option>
+                    <option value="lowToHigh">Price: Low to High</option>
+                    <option value="highToLow">Price: High to Low</option>
+                    <option value="discount">Biggest Discount</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Dynamic Products Grid -->
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Product Cards generated via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16 glass-panel rounded-3xl mt-4">
+            <i class="fa-solid fa-shirt text-5xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-white">No products found</h3>
+            <p class="text-gray-400 text-sm mt-1">Try selecting a different category or clear search filter.</p>
+            <button onclick="resetFilters()" class="mt-4 px-5 py-2 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30 rounded-xl text-xs font-bold hover:bg-neon-cyan hover:text-dark-900 transition-all">Reset All Filters</button>
+        </div>
+    </main>
+
+    <!-- PRODUCT DETAIL MODAL -->
+    <div id="productModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto modal-backdrop" onclick="handleBackdropClick(event, 'productModal')">
+        <div class="glass-panel-neon rounded-3xl max-w-4xl w-full border border-neon-cyan/30 overflow-hidden relative my-8 animate-fadeIn" onclick="event.stopPropagation()">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-dark-800/80 hover:bg-neon-magenta text-white flex items-center justify-center border border-white/10 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
+                <!-- Product Gallery -->
+                <div class="space-y-4">
+                    <div class="w-full h-80 rounded-2xl bg-dark-800 border border-white/10 overflow-hidden relative group">
+                        <img id="modalMainImg" src="" alt="Product Detail" class="w-full h-full object-cover transition-transform duration-300">
+                        <span id="modalDiscountBadge" class="absolute top-3 left-3 bg-neon-magenta text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            -20% OFF
+                        </span>
+                    </div>
+                    <div id="modalThumbnails" class="flex items-center gap-3 overflow-x-auto pb-2">
+                        <!-- Thumbnails injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Product Info & Buying Actions -->
+                <div class="flex flex-col justify-between space-y-4">
+                    <div>
+                        <span id="modalCategory" class="text-xs uppercase font-extrabold tracking-widest text-neon-cyan">CATEGORY</span>
+                        <h2 id="modalTitle" class="text-2xl md:text-3xl font-extrabold text-white mt-1">Product Title</h2>
+
+                        <div class="flex items-baseline gap-3 my-3">
+                            <span id="modalDiscountPrice" class="text-3xl font-black text-neon-lime">1,150 BDT</span>
+                            <span id="modalRegularPrice" class="text-lg text-gray-400 line-through">1,450 BDT</span>
+                            <span id="modalSavings" class="text-xs text-neon-cyan font-semibold">Save 300 BDT</span>
+                        </div>
+
+                        <p id="modalDescription" class="text-gray-300 text-sm leading-relaxed mb-4">
+                            High performance microfiber polyester with dri-fit ventilation panels.
+                        </p>
+
+                        <!-- Size Selector -->
+                        <div class="mb-4">
+                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Select Size:</label>
+                            <div class="flex flex-wrap gap-2.5" id="modalSizeOptions">
+                                <!-- Sizes injected via JS -->
+                            </div>
+                            <span id="sizeError" class="text-xs text-neon-magenta hidden mt-1 block">Please select a size to proceed.</span>
+                        </div>
+
+                        <!-- Quantity Selector -->
+                        <div class="mb-6">
+                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Select Quantity:</label>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center bg-dark-800 rounded-xl border border-white/10 p-1">
+                                    <button onclick="changeModalQty(-1)" class="w-9 h-9 rounded-lg bg-dark-700 hover:bg-neon-magenta text-white font-black text-sm flex items-center justify-center transition-colors">-</button>
+                                    <span id="modalQtyDisplay" class="w-12 text-center text-sm font-bold text-white">1</span>
+                                    <button onclick="changeModalQty(1)" class="w-9 h-9 rounded-lg bg-dark-700 hover:bg-neon-lime text-dark-900 font-black text-sm flex items-center justify-center transition-colors">+</button>
+                                </div>
+                                <span id="modalCalculatedTotal" class="text-xs text-neon-cyan font-bold">Total: 1,150 BDT</span>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Promo Hint -->
+                        <div class="p-3 rounded-xl bg-dark-800/80 border border-white/10 text-xs text-gray-300 flex items-center gap-3">
+                            <i class="fa-solid fa-truck-fast text-neon-cyan text-lg"></i>
+                            <div>
+                                <span class="font-bold text-white block">Cash on Delivery Available</span>
+                                Inside Dhaka 80 BDT | Outside Dhaka 150 BDT
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-4 pt-4 border-t border-white/10">
+                        <button onclick="addToCartFromModal()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-neon-cyan to-blue-600 text-dark-900 font-extrabold text-sm uppercase tracking-wider hover:brightness-110 shadow-lg shadow-neon-cyan/20 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bag-add"></i> Add To Cart
+                        </button>
+                        <button onclick="buyNowFromModal()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-neon-lime to-emerald-600 text-dark-900 font-extrabold text-sm uppercase tracking-wider hover:brightness-110 shadow-lg shadow-neon-lime/20 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> Buy Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CART & CHECKOUT SLIDE-OVER MODAL -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex justify-end modal-backdrop" onclick="handleBackdropClick(event, 'cartDrawer')">
+        <div class="w-full max-w-lg bg-dark-900 border-l border-white/10 h-full flex flex-col justify-between p-6 overflow-y-auto shadow-2xl relative" onclick="event.stopPropagation()">
+
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-bag-shopping text-neon-cyan text-xl"></i>
+                    <h2 class="text-xl font-extrabold text-white">Your Checkout Bag</h2>
+                </div>
+                <button onclick="closeCart()" class="text-gray-400 hover:text-neon-magenta p-2 text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-4 space-y-4" id="cartItemsContainer">
+                <!-- Cart items dynamically listed here -->
+            </div>
+
+            <div class="border-t border-white/10 pt-4 space-y-4">
+                <div id="cartSummary" class="space-y-2 text-xs text-gray-300">
+                    <div class="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span id="summarySubtotal" class="font-bold text-white">0 BDT</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Delivery Fee:</span>
+                        <span id="summaryDelivery" class="font-bold text-neon-cyan">80 BDT</span>
+                    </div>
+                    <div class="flex justify-between text-base font-extrabold text-neon-lime border-t border-white/10 pt-2">
+                        <span>Total Amount:</span>
+                        <span id="summaryTotal">80 BDT</span>
+                    </div>
+                </div>
+
+                <form id="checkoutForm" onsubmit="handlePlaceOrder(event)" class="space-y-3 pt-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase">Customer Name *</label>
+                        <input type="text" id="custName" required placeholder="e.g. Mahin Ahmed" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none mt-1">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase">Phone Number (COD Verification) *</label>
+                        <div class="flex items-center mt-1">
+                            <span class="bg-dark-700 border border-r-0 border-white/10 text-neon-cyan text-xs font-bold px-3 py-2 rounded-l-xl">
+                                +880
+                            </span>
+                            <input type="tel" id="custPhoneDigits" required maxlength="10" placeholder="1738406484" oninput="validateBdPhone(this)"
+                                class="w-full bg-dark-800 border border-white/10 rounded-r-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none font-mono">
+                        </div>
+                        <p id="phoneError" class="text-[10px] text-neon-magenta hidden mt-1">Must be exactly 10 digits after +880 (e.g. +8801738406484)</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase">Delivery Location *</label>
+                        <select id="custLocation" onchange="updateCartSummary()" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none mt-1">
+                            <option value="dhaka">Inside Dhaka City (80 BDT)</option>
+                            <option value="outside">Outside Dhaka (150 BDT)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase">Full Address Details *</label>
+                        <textarea id="custAddress" required rows="2" placeholder="House/Road, Area, Thana, District" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none mt-1"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Select Payment Method *</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-dark-800 border border-white/10 cursor-pointer hover:border-neon-cyan">
+                                <input type="radio" name="payMethod" value="COD" checked onchange="togglePaymentFields()" class="accent-neon-cyan">
+                                <span class="text-xs font-bold text-white">Cash on Delivery</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-dark-800 border border-white/10 cursor-pointer hover:border-neon-cyan">
+                                <input type="radio" name="payMethod" value="bKash" onchange="togglePaymentFields()" class="accent-neon-magenta">
+                                <span class="text-xs font-bold text-neon-magenta">bKash Send Money</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="bkashPaymentDetails" class="hidden p-3 rounded-xl bg-pink-950/40 border border-pink-500/30 space-y-2 text-xs">
+                        <div class="text-pink-300 font-bold flex items-center justify-between">
+                            <span><i class="fa-solid fa-mobile-screen"></i> bKash Personal Number:</span>
+                            <span class="font-mono text-white text-sm bg-black/40 px-2 py-0.5 rounded border border-pink-500/40 select-all">01738406484</span>
+                        </div>
+                        <p class="text-[11px] text-gray-300">
+                            Send Money total amount to <strong>01738406484</strong> and enter TrxID below:
+                        </p>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block">bKash Sender Phone</label>
+                                <input type="tel" id="bkashSender" placeholder="01738406484" class="w-full bg-dark-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-neon-magenta outline-none font-mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 font-bold block">Transaction ID (TrxID)</label>
+                                <input type="text" id="bkashTrx" placeholder="BAX892K109" class="w-full bg-dark-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-neon-magenta outline-none uppercase font-mono">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-neon-cyan via-blue-600 to-neon-lime text-dark-900 font-black text-sm uppercase tracking-wider hover:brightness-110 transition-all shadow-lg shadow-neon-cyan/20">
+                        Confirm & Place Order <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER SUCCESS CONFIRMATION MODAL -->
+    <div id="orderSuccessModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 modal-backdrop" onclick="handleBackdropClick(event, 'orderSuccessModal')">
+        <div class="glass-panel-neon rounded-3xl max-w-md w-full p-6 text-center border border-neon-lime/40 space-y-4 animate-fadeIn relative" onclick="event.stopPropagation()">
+            <button onclick="closeOrderSuccessModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="w-16 h-16 rounded-full bg-neon-lime/20 border border-neon-lime flex items-center justify-center mx-auto text-neon-lime text-3xl">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white">ORDER PLACED SUCCESSFULLY!</h2>
+            <p class="text-xs text-gray-300 leading-relaxed">
+                Thank you for shopping with XeroxSports. Order ID <span id="placedOrderId" class="font-bold text-neon-cyan">#ORD-999</span> has been received. We will call you at your provided BD number to verify delivery.
+            </p>
+            <div class="p-3 bg-dark-800 rounded-xl border border-white/10 text-left text-xs space-y-1">
+                <div class="text-gray-400">Total Bill: <span id="placedOrderTotal" class="font-bold text-neon-lime">0 BDT</span></div>
+                <div class="text-gray-400">Delivery Status: <span class="text-neon-cyan font-bold">Pending Verification</span></div>
+            </div>
+            <button onclick="closeOrderSuccessModal()" class="w-full py-3 bg-neon-cyan text-dark-900 font-bold rounded-xl text-xs uppercase tracking-wider hover:brightness-110">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 bg-dark-900/90 backdrop-blur-lg mt-16 py-10 text-xs text-gray-400 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div class="space-y-2">
+                <span class="font-display text-3xl font-black text-white">XEROX<span class="text-neon-cyan">SPORTS</span></span>
+                <p class="text-[11px] text-gray-400">Premium Authentic Football Kits, Jerseys & Gym Apparel in Bangladesh.</p>
+            </div>
+            <div class="space-y-2 bg-dark-800/60 p-4 rounded-2xl border border-white/10">
+                <span class="text-neon-cyan font-extrabold uppercase text-[11px] block tracking-wider"><i class="fa-solid fa-user-shield"></i> Store Contact & Owner Details</span>
+                <div class="text-gray-300 space-y-1 text-xs">
+                    <div><strong class="text-white">Owner:</strong> Mahin</div>
+                    <div><strong class="text-white">Phone / bKash:</strong> <span class="text-neon-lime font-mono">01738406484</span></div>
+                    <div><strong class="text-white">Email:</strong> <a href="mailto:muhammadmahin45@gmail.com" class="text-neon-cyan underline">muhammadmahin45@gmail.com</a></div>
+                    <div><strong class="text-white">Office Address:</strong> Noya Paltan, Dhaka, Bangladesh</div>
+                </div>
+            </div>
+            <div class="space-y-2 text-right md:text-right">
+                <a href="https://www.instagram.com/_xeroxsports_" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-bold text-xs hover:brightness-110">
+                    <i class="fa-brands fa-instagram text-base"></i> @_xeroxsports_
+                </a>
+                <p class="text-[11px] text-gray-500 mt-2">© 2026 XeroxSports. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SECRET ADMIN LOCK -->
+    <div class="fixed bottom-3 right-3 z-50">
+        <button onclick="openAdminAuthModal()" title="System Console" class="w-7 h-7 rounded-full bg-dark-800/80 hover:bg-neon-cyan/20 border border-white/10 text-gray-500 hover:text-neon-cyan flex items-center justify-center transition-all opacity-40 hover:opacity-100 shadow-md">
+            <i class="fa-solid fa-lock text-xs"></i>
+        </button>
+    </div>
+
+    <!-- Admin Password Auth Modal -->
+    <div id="adminAuthModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 modal-backdrop" onclick="handleBackdropClick(event, 'adminAuthModal')">
+        <div class="glass-panel-neon rounded-2xl max-w-sm w-full p-6 border border-neon-cyan/30 space-y-4 relative" onclick="event.stopPropagation()">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <div class="flex items-center gap-2 border-b border-white/10 pb-3">
+                <i class="fa-solid fa-shield-halved text-neon-cyan"></i>
+                <h3 class="text-sm font-bold text-neon-cyan uppercase tracking-wider">Admin Authentication</h3>
+            </div>
+            <p class="text-xs text-gray-400">Enter master security password to open admin management portal:</p>
+            <form onsubmit="verifyAdminPassword(event)" class="space-y-3">
+                <input type="password" id="adminPasswordInput" placeholder="Enter Password" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none">
+                <p id="adminAuthError" class="text-[11px] text-neon-magenta hidden font-semibold">Incorrect password! Access denied.</p>
+                <button type="submit" class="w-full py-2.5 bg-neon-cyan text-dark-900 font-bold rounded-xl text-xs uppercase hover:brightness-110">
+                    Unlock Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FULL ADMIN DASHBOARD -->
+    <div id="adminDashboard" class="fixed inset-0 z-50 bg-dark-900/95 backdrop-blur-xl hidden flex flex-col overflow-hidden">
+
+        <header class="bg-dark-800 border-b border-white/10 px-6 py-4 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-neon-lime animate-ping"></span>
+                <h2 class="font-display text-2xl font-black text-white">XEROX<span class="text-neon-cyan">SPORTS</span> ADMIN CONSOLE</h2>
+            </div>
+            <button onclick="closeAdminDashboard()" class="px-4 py-2 bg-dark-700 hover:bg-neon-magenta text-white text-xs font-bold rounded-xl border border-white/10 transition-colors">
+                <i class="fa-solid fa-right-from-bracket"></i> Exit Admin
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8">
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                    <span class="text-xs text-gray-400 block font-bold">Total Orders</span>
+                    <span id="statTotalOrders" class="text-2xl font-black text-white mt-1 block">0</span>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                    <span class="text-xs text-gray-400 block font-bold">Pending Orders</span>
+                    <span id="statPendingOrders" class="text-2xl font-black text-neon-gold mt-1 block">0</span>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                    <span class="text-xs text-gray-400 block font-bold">Accepted / Verified</span>
+                    <span id="statVerifiedOrders" class="text-2xl font-black text-neon-lime mt-1 block">0</span>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl border border-white/10">
+                    <span class="text-xs text-gray-400 block font-bold">Verified Earnings</span>
+                    <span id="statTotalEarnings" class="text-2xl font-black text-neon-cyan mt-1 block">0 BDT</span>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 border border-white/10 space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-neon-cyan"></i> Complete Verified Sales Overview
+                    </h3>
+                    <p class="text-xs text-gray-400">All period earnings (1D, 3D, 7D, 15D, 1M, 6M, 1Y) displayed simultaneously. Updates only when orders are Accepted/Verified.</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3" id="allPeriodsContainer">
+                    <!-- Dynamic multi-period cards injected here -->
+                </div>
+
+                <div class="h-72 w-full pt-4 border-t border-white/10">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 border border-white/10">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-neon-lime"></i> Orders Management List
+                    </h3>
+                    <span class="text-xs text-gray-400">Real-time incoming customer orders</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-dark-800 text-gray-400 uppercase font-bold text-[10px]">
+                            <tr>
+                                <th class="p-3">Order ID / Date</th>
+                                <th class="p-3">Customer Details</th>
+                                <th class="p-3">Location & Fee</th>
+                                <th class="p-3">Items</th>
+                                <th class="p-3">Payment Info</th>
+                                <th class="p-3">Total BDT</th>
+                                <th class="p-3">Action / Accept</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminOrdersTable" class="divide-y divide-white/5">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-neon-lime"></i> Add New Product
+                    </h3>
+
+                    <form id="addProductForm" onsubmit="handleAddNewProduct(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase">Product Title *</label>
+                            <input type="text" id="pTitle" required placeholder="Barcelona Home Jersey 2026" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase">Category *</label>
+                                <select id="pCategory" required class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none">
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase">Stock *</label>
+                                <input type="number" id="pStock" required value="20" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase">Regular Price (BDT) *</label>
+                                <input type="number" id="pRegularPrice" required placeholder="1450" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase">Offer Price (BDT) *</label>
+                                <input type="number" id="pDiscountPrice" required placeholder="1150" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase">Image URLs (Comma Separated) *</label>
+                            <textarea id="pImages" required rows="2" placeholder="https://images.unsplash.com/photo-1, https://images.unsplash.com/photo-2" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase">Available Sizes</label>
+                            <div class="flex gap-3 pt-1 text-xs text-white">
+                                <label><input type="checkbox" name="pSize" value="S" checked class="accent-neon-cyan"> S</label>
+                                <label><input type="checkbox" name="pSize" value="M" checked class="accent-neon-cyan"> M</label>
+                                <label><input type="checkbox" name="pSize" value="L" checked class="accent-neon-cyan"> L</label>
+                                <label><input type="checkbox" name="pSize" value="XL" checked class="accent-neon-cyan"> XL</label>
+                                <label><input type="checkbox" name="pSize" value="XXL" class="accent-neon-cyan"> XXL</label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase">Description</label>
+                            <textarea id="pDesc" rows="2" placeholder="High performance moisture-wicking technology fabric..." class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-neon-cyan outline-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-neon-lime text-dark-900 font-extrabold rounded-xl text-xs uppercase tracking-wider hover:brightness-110">
+                            Save Product To Store
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-2 glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center justify-between">
+                        <span><i class="fa-solid fa-boxes-stacked text-neon-cyan"></i> Store Inventory</span>
+                        <span id="productCounterText" class="text-xs text-gray-400 font-normal">0 items</span>
+                    </h3>
+
+                    <div class="overflow-y-auto max-h-[480px] space-y-3 pr-2" id="adminInventoryList">
+                        <!-- Inventory list loaded via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-tags text-neon-purple"></i> Categories Manager
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="newCatInput" placeholder="New Category (e.g., Training Gear)" class="flex-1 bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                        <button onclick="addCategory()" class="px-4 py-2 bg-neon-purple text-white text-xs font-bold rounded-xl hover:brightness-110">Add</button>
+                    </div>
+                    <div class="flex flex-wrap gap-2 pt-2" id="adminCategoryTags">
+                        <!-- Tags -->
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-neon-cyan"></i> Edit Top Offer Marquee Banner
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase">Banner Text Message</label>
+                            <input type="text" id="adminBannerTextInput" class="w-full bg-dark-800 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                        </div>
+                        <button onclick="saveBannerText()" class="px-5 py-2.5 bg-neon-cyan text-dark-900 text-xs font-black rounded-xl hover:brightness-110 uppercase tracking-wider">
+                            Update Banner Ticker
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT APP LOGIC -->
+    <script>
+        /* ==================== VIDEO LOOP HANDLER ==================== */
+        function initSeamlessVideoLoop() {
+            const vid = document.getElementById('bgVideoLoop');
+            if (!vid) return;
+
+            vid.muted = true;
+            vid.playsInline = true;
+            vid.loop = true;
+
+            const playPromise = vid.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    document.body.addEventListener('touchstart', () => vid.play(), { once: true });
+                    document.body.addEventListener('click', () => vid.play(), { once: true });
+                });
+            }
+
+            vid.addEventListener('ended', () => {
+                vid.currentTime = 0;
+                vid.play();
+            });
+
+            vid.addEventListener('error', () => {
+                console.warn('Background video could not load. Expected: file:///C:/Users/Ayon/Downloads/New%20folder/footbalvideo.mp4');
+            });
+
+            vid.addEventListener('stalled', () => {
+                vid.play();
+            });
+        }
+
+        /* ==================== APP STATE ==================== */
+        const defaultCategories = ['All Kits', 'Jerseys', 'Retro Kits', 'Fan Edition', 'Player Version', 'Gym Apparel'];
+
+        const defaultProducts = [
+            {
+                id: 1,
+                title: 'Real Madrid 2017 Dragon Final Edition Kit',
+                category: 'Retro Kits',
+                regularPrice: 1450,
+                discountPrice: 1150,
+                images: [
+                    'https://images.unsplash.com/photo-1577212017184-80cc0da11082?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80'
+                ],
+                sizes: ['S', 'M', 'L', 'XL'],
+                stock: 12,
+                description: 'Iconic Dragon Yamamoto Edition jersey from Real Madrid 2017 campaign. Authentic heat-pressed logos.'
+            },
+            {
+                id: 2,
+                title: 'Argentina 3-Star World Champion Home Kit 2026',
+                category: 'Jerseys',
+                regularPrice: 1350,
+                discountPrice: 1050,
+                images: [
+                    'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=600&q=80'
+                ],
+                sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+                stock: 20,
+                description: 'Official 3-star embroidered badge with gold World Cup winners patch.'
+            },
+            {
+                id: 3,
+                title: 'Arsenal 2005 O2 Red Highbury Retro Kit',
+                category: 'Retro Kits',
+                regularPrice: 1500,
+                discountPrice: 1200,
+                images: [
+                    'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=600&q=80'
+                ],
+                sizes: ['M', 'L', 'XL'],
+                stock: 8,
+                description: 'Commemorative Highbury farewell kit in classic maroon red.'
+            },
+            {
+                id: 4,
+                title: 'Manchester City Player Version Kit 2026',
+                category: 'Player Version',
+                regularPrice: 1600,
+                discountPrice: 1250,
+                images: [
+                    'https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=600&q=80'
+                ],
+                sizes: ['S', 'M', 'L', 'XL'],
+                stock: 15,
+                description: 'Slim fit performance kit with ventilation heat map technology.'
+            }
+        ];
+
+        let categories = JSON.parse(localStorage.getItem('xs_categories')) || defaultCategories;
+        let products = JSON.parse(localStorage.getItem('xs_products')) || defaultProducts;
+
+        let orders = JSON.parse(localStorage.getItem('xs_orders')) || [];
+        let cart = JSON.parse(localStorage.getItem('xs_cart')) || [];
+        let bannerText = localStorage.getItem('xs_banner') || '🔥 SPECIAL OFFER: BUY ANY 2 JERSEYS & GET 500 BDT OFF! || ⚡ CASH ON DELIVERY: DHAKA 80 BDT | OUTSIDE DHAKA 150 BDT || 📱 BKASH PERSONAL: 01738406484';
+
+        let currentCategory = 'All Kits';
+        let selectedProductForModal = null;
+        let selectedModalSize = '';
+        let selectedModalQty = 1;
+        let salesChartInstance = null;
+
+        /* ==================== INITIALIZATION ==================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            initSeamlessVideoLoop();
+            renderBannerText();
+            renderCategoryPills();
+            renderProducts();
+            updateCartBadge();
+            setupTiltCards();
+            setupAdminCategorySelect();
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeProductModal();
+                    closeCart();
+                    closeOrderSuccessModal();
+                    closeAdminAuthModal();
+                }
+            });
+        });
+
+        /* ==================== MODAL BACKDROP OUTSIDE CLICK DISMISS ==================== */
+        function handleBackdropClick(event, modalId) {
+            if (event.target.classList.contains('modal-backdrop')) {
+                if (modalId === 'productModal') closeProductModal();
+                if (modalId === 'cartDrawer') closeCart();
+                if (modalId === 'orderSuccessModal') closeOrderSuccessModal();
+                if (modalId === 'adminAuthModal') closeAdminAuthModal();
+            }
+        }
+
+        /* ==================== BANNER TICKER ==================== */
+        function renderBannerText() {
+            const container = document.getElementById('bannerTicker');
+            const repeatedText = `<span class="flex items-center gap-2"><i class="fa-solid fa-fire text-neon-magenta"></i> ${bannerText}</span>`;
+            container.innerHTML = repeatedText + repeatedText + repeatedText;
+            document.getElementById('adminBannerTextInput').value = bannerText;
+        }
+
+        function saveBannerText() {
+            const input = document.getElementById('adminBannerTextInput').value.trim();
+            if (input) {
+                bannerText = input;
+                localStorage.setItem('xs_banner', bannerText);
+                renderBannerText();
+                alert('Banner marquee text updated!');
+            }
+        }
+
+        /* ==================== CATEGORIES & FILTERS ==================== */
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryPills');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                    currentCategory === cat
+                    ? 'bg-gradient-to-r from-neon-cyan to-blue-600 text-dark-900 shadow-md shadow-neon-cyan/20'
+                    : 'bg-dark-800 text-gray-400 hover:text-white hover:bg-dark-700 border border-white/5'
+                }">
+                    ${cat}
+                </button>
+            `).join('');
+
+            renderAdminCategories();
+        }
+
+        function setCategory(cat) {
+            currentCategory = cat;
+            renderCategoryPills();
+            renderProducts();
+        }
+
+        function resetFilters() {
+            currentCategory = 'All Kits';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchInputMobile').value = '';
+            document.getElementById('sortFilter').value = 'featured';
+            renderCategoryPills();
+            renderProducts();
+        }
+
+        /* ==================== PRODUCTS DISPLAY ==================== */
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            const searchVal = (document.getElementById('searchInput').value || document.getElementById('searchInputMobile').value || '').toLowerCase();
+            const sortVal = document.getElementById('sortFilter').value;
+
+            let filtered = products.filter(p => {
+                const matchesCat = currentCategory === 'All Kits' || p.category === currentCategory;
+                const matchesSearch = p.title.toLowerCase().includes(searchVal) || p.description.toLowerCase().includes(searchVal);
+                return matchesCat && matchesSearch;
+            });
+
+            if (sortVal === 'lowToHigh') {
+                filtered.sort((a,b) => a.discountPrice - b.discountPrice);
+            } else if (sortVal === 'highToLow') {
+                filtered.sort((a,b) => b.discountPrice - a.discountPrice);
+            } else if (sortVal === 'discount') {
+                filtered.sort((a,b) => (b.regularPrice - b.discountPrice) - (a.regularPrice - a.discountPrice));
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(p => {
+                const discountPercent = Math.round(((p.regularPrice - p.discountPrice) / p.regularPrice) * 100);
+                return `
+                    <div class="tilt-card-wrapper">
+                        <div class="tilt-card card-clear rounded-2xl overflow-hidden flex flex-col justify-between h-full group transition-all duration-300">
+                            <div>
+                                <div class="relative h-60 overflow-hidden cursor-pointer" onclick="openProductModal(${p.id})">
+                                    <img src="${p.images[0]}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
+                                    <div class="absolute top-3 left-3">
+                                        <span class="bg-neon-magenta text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-full uppercase">
+                                            -${discountPercent}% OFF
+                                        </span>
+                                    </div>
+                                    <span class="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-neon-cyan text-[10px] font-bold px-2 py-1 rounded-md border border-white/15 uppercase">
+                                        ${p.category}
+                                    </span>
+                                </div>
+
+                                <div class="p-4 space-y-2 bg-transparent">
+                                    <h3 class="font-bold text-white text-sm line-clamp-2 hover:text-neon-cyan transition-colors cursor-pointer" onclick="openProductModal(${p.id})">
+                                        ${p.title}
+                                    </h3>
+                                    <div class="flex items-center gap-2 text-xs price-row">
+                                        <span class="text-neon-lime font-black text-base">${p.discountPrice} BDT</span>
+                                        <span class="text-gray-400 line-through">${p.regularPrice} BDT</span>
+                                    </div>
+                                    <div class="flex gap-1 text-[10px] text-gray-300 font-bold pt-1">
+                                        ${p.sizes.map(s => `<span class="px-1.5 py-0.5 bg-white/5 rounded border border-white/10">${s}</span>`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 pt-0 grid grid-cols-2 gap-2">
+                                <button onclick="openProductModal(${p.id})" class="py-2 rounded-xl bg-white/5 hover:bg-white/15 backdrop-blur-sm text-white text-xs font-bold border border-white/15 transition-colors">
+                                    <i class="fa-solid fa-eye"></i> Details
+                                </button>
+                                <button onclick="quickAddToCart(${p.id})" class="py-2 rounded-xl bg-neon-cyan/10 hover:bg-neon-cyan hover:text-dark-900 text-neon-cyan text-xs font-extrabold border border-neon-cyan/30 backdrop-blur-sm transition-all">
+                                    <i class="fa-solid fa-cart-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            setupTiltCards();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderProducts);
+        document.getElementById('searchInputMobile').addEventListener('input', renderProducts);
+
+        function toggleMobileSearch() {
+            document.getElementById('mobileSearch').classList.toggle('hidden');
+        }
+
+        /* ==================== 3D CARD TILT EFFECT ==================== */
+        function setupTiltCards() {
+            const cards = document.querySelectorAll('.tilt-card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+
+                    const rotateX = ((y - centerY) / centerY) * -8;
+                    const rotateY = ((x - centerX) / centerX) * 8;
+
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(8px)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0px)';
+                });
+            });
+        }
+
+        /* ==================== PRODUCT MODAL & QUANTITY SELECTOR ==================== */
+        function openProductModal(id) {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+
+            selectedProductForModal = p;
+            selectedModalSize = p.sizes[0] || 'M';
+            selectedModalQty = 1;
+
+            document.getElementById('modalTitle').innerText = p.title;
+            document.getElementById('modalCategory').innerText = p.category;
+            document.getElementById('modalDiscountPrice').innerText = `${p.discountPrice} BDT`;
+            document.getElementById('modalRegularPrice').innerText = `${p.regularPrice} BDT`;
+            document.getElementById('modalSavings').innerText = `Save ${p.regularPrice - p.discountPrice} BDT`;
+            document.getElementById('modalDescription').innerText = p.description;
+            document.getElementById('modalMainImg').src = p.images[0];
+
+            const discountPercent = Math.round(((p.regularPrice - p.discountPrice) / p.regularPrice) * 100);
+            document.getElementById('modalDiscountBadge').innerText = `-${discountPercent}% OFF`;
+
+            const thumbContainer = document.getElementById('modalThumbnails');
+            thumbContainer.innerHTML = p.images.map((img, idx) => `
+                <img src="${img}" onclick="setModalMainImage('${img}')" class="w-16 h-16 rounded-xl object-cover border-2 cursor-pointer hover:border-neon-cyan ${idx === 0 ? 'border-neon-cyan' : 'border-white/10'}">
+            `).join('');
+
+            renderModalSizes();
+            updateModalQtyDisplay();
+
+            document.getElementById('sizeError').classList.add('hidden');
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function changeModalQty(delta) {
+            selectedModalQty += delta;
+            if (selectedModalQty < 1) selectedModalQty = 1;
+            updateModalQtyDisplay();
+        }
+
+        function updateModalQtyDisplay() {
+            document.getElementById('modalQtyDisplay').innerText = selectedModalQty;
+            if (selectedProductForModal) {
+                const total = selectedProductForModal.discountPrice * selectedModalQty;
+                document.getElementById('modalCalculatedTotal').innerText = `Total: ${total.toLocaleString()} BDT`;
+            }
+        }
+
+        function setModalMainImage(src) {
+            document.getElementById('modalMainImg').src = src;
+        }
+
+        function renderModalSizes() {
+            if (!selectedProductForModal) return;
+            const container = document.getElementById('modalSizeOptions');
+            container.innerHTML = selectedProductForModal.sizes.map(s => `
+                <button onclick="selectModalSize('${s}')" class="w-12 h-10 rounded-xl text-xs font-bold transition-all ${
+                    selectedModalSize === s
+                    ? 'bg-neon-cyan text-dark-900 shadow-md shadow-neon-cyan/30 border-2 border-neon-cyan'
+                    : 'bg-dark-800 text-gray-300 border border-white/10 hover:border-white/30'
+                }">
+                    ${s}
+                </button>
+            `).join('');
+        }
+
+        function selectModalSize(s) {
+            selectedModalSize = s;
+            document.getElementById('sizeError').classList.add('hidden');
+            renderModalSizes();
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+
+        /* ==================== CART DRAWER ==================== */
+        function quickAddToCart(id) {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+            addItemToCart(p, p.sizes[0] || 'M', 1);
+            openCart();
+        }
+
+        function addToCartFromModal() {
+            if (!selectedProductForModal) return;
+            if (!selectedModalSize) {
+                document.getElementById('sizeError').classList.remove('hidden');
+                return;
+            }
+            addItemToCart(selectedProductForModal, selectedModalSize, selectedModalQty);
+            closeProductModal();
+            openCart();
+        }
+
+        function buyNowFromModal() {
+            if (!selectedProductForModal) return;
+            if (!selectedModalSize) {
+                document.getElementById('sizeError').classList.remove('hidden');
+                return;
+            }
+            addItemToCart(selectedProductForModal, selectedModalSize, selectedModalQty);
+            closeProductModal();
+            openCart();
+        }
+
+        function addItemToCart(product, size, qty = 1) {
+            const existingIndex = cart.findIndex(i => i.id === product.id && i.size === size);
+            if (existingIndex > -1) {
+                cart[existingIndex].qty += qty;
+            } else {
+                cart.push({
+                    id: product.id,
+                    title: product.title,
+                    price: product.discountPrice,
+                    image: product.images[0],
+                    size: size,
+                    qty: qty
+                });
+            }
+            saveCart();
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+            document.getElementById('cartCountBadge').innerText = totalQty;
+            document.getElementById('cartTotalHeader').innerText = `${subtotal.toLocaleString()} BDT`;
+        }
+
+        function saveCart() {
+            localStorage.setItem('xs_cart', JSON.stringify(cart));
+        }
+
+        function openCart() {
+            renderCartDrawer();
+            document.getElementById('cartDrawer').classList.remove('hidden');
+        }
+
+        function closeCart() {
+            document.getElementById('cartDrawer').classList.add('hidden');
+        }
+
+        function renderCartDrawer() {
+            const container = document.getElementById('cartItemsContainer');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 space-y-3">
+                        <i class="fa-solid fa-cart-flatbed text-4xl text-gray-600"></i>
+                        <p class="text-gray-400 text-xs">Your shopping bag is currently empty.</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = cart.map((item, idx) => `
+                    <div class="flex items-center gap-3 bg-dark-800 p-3 rounded-xl border border-white/10">
+                        <img src="${item.image}" class="w-14 h-14 rounded-lg object-cover">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-white truncate">${item.title}</h4>
+                            <div class="text-[11px] text-gray-400 mt-0.5">Size: <span class="text-neon-cyan font-bold">${item.size}</span> | ${item.price} BDT</div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button onclick="changeCartQty(${idx}, -1)" class="w-6 h-6 rounded bg-dark-700 hover:bg-neon-magenta text-white flex items-center justify-center text-xs font-bold">-</button>
+                                <span class="text-xs font-bold text-white px-1">${item.qty}</span>
+                                <button onclick="changeCartQty(${idx}, 1)" class="w-6 h-6 rounded bg-dark-700 hover:bg-neon-lime text-dark-900 flex items-center justify-center text-xs font-bold">+</button>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-xs font-extrabold text-neon-lime">${(item.price * item.qty).toLocaleString()} BDT</span>
+                            <button onclick="removeCartItem(${idx})" class="text-gray-500 hover:text-neon-magenta text-xs mt-2"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateCartSummary();
+        }
+
+        function changeCartQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            saveCart();
+            updateCartBadge();
+            renderCartDrawer();
+        }
+
+        function removeCartItem(index) {
+            cart.splice(index, 1);
+            saveCart();
+            updateCartBadge();
+            renderCartDrawer();
+        }
+
+        function updateCartSummary() {
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+            const loc = document.getElementById('custLocation').value;
+            const deliveryFee = loc === 'outside' ? 150 : 80;
+            const total = subtotal > 0 ? subtotal + deliveryFee : 0;
+
+            document.getElementById('summarySubtotal').innerText = `${subtotal.toLocaleString()} BDT`;
+            document.getElementById('summaryDelivery').innerText = `${deliveryFee} BDT`;
+            document.getElementById('summaryTotal').innerText = `${total.toLocaleString()} BDT`;
+        }
+
+        /* ==================== PHONE VALIDATION (+880 EXACT 10 DIGITS) ==================== */
+        function validateBdPhone(input) {
+            input.value = input.value.replace(/\D/g, '');
+            const errP = document.getElementById('phoneError');
+            if (input.value.length === 10) {
+                errP.classList.add('hidden');
+            } else {
+                errP.classList.remove('hidden');
+            }
+        }
+
+        function togglePaymentFields() {
+            const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
+            const bkashPanel = document.getElementById('bkashPaymentDetails');
+            if (payMethod === 'bKash') {
+                bkashPanel.classList.remove('hidden');
+                document.getElementById('bkashSender').required = true;
+                document.getElementById('bkashTrx').required = true;
+            } else {
+                bkashPanel.classList.add('hidden');
+                document.getElementById('bkashSender').required = false;
+                document.getElementById('bkashTrx').required = false;
+            }
+        }
+
+        function handlePlaceOrder(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert('Your bag is empty! Please add products first.');
+                return;
+            }
+
+            const name = document.getElementById('custName').value.trim();
+            const phoneDigits = document.getElementById('custPhoneDigits').value.trim();
+
+            if (phoneDigits.length !== 10) {
+                document.getElementById('phoneError').classList.remove('hidden');
+                alert('Please enter a valid 10-digit phone number after +880!');
+                return;
+            }
+
+            const fullPhone = `+880${phoneDigits}`;
+            const loc = document.getElementById('custLocation').value;
+            const address = document.getElementById('custAddress').value.trim();
+            const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
+
+            const deliveryFee = loc === 'outside' ? 150 : 80;
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+            const total = subtotal + deliveryFee;
+
+            const bkashSender = payMethod === 'bKash' ? document.getElementById('bkashSender').value.trim() : 'N/A';
+            const bkashTrx = payMethod === 'bKash' ? document.getElementById('bkashTrx').value.trim() : 'N/A';
+
+            const newOrder = {
+                id: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
+                timestamp: Date.now(),
+                dateStr: new Date().toLocaleString(),
+                name: name,
+                phone: fullPhone,
+                location: loc,
+                deliveryFee: deliveryFee,
+                address: address,
+                items: [...cart],
+                paymentMethod: payMethod,
+                bkashSender: bkashSender,
+                bkashTrx: bkashTrx,
+                total: total,
+                status: 'Pending'
+            };
+
+            orders.unshift(newOrder);
+            localStorage.setItem('xs_orders', JSON.stringify(orders));
+
+            cart = [];
+            saveCart();
+            updateCartBadge();
+            closeCart();
+
+            document.getElementById('placedOrderId').innerText = `#${newOrder.id}`;
+            document.getElementById('placedOrderTotal').innerText = `${newOrder.total.toLocaleString()} BDT`;
+            document.getElementById('orderSuccessModal').classList.remove('hidden');
+
+            renderAdminOrders();
+        }
+
+        function closeOrderSuccessModal() {
+            document.getElementById('orderSuccessModal').classList.add('hidden');
+        }
+
+        /* ==================== SECRET ADMIN CONSOLE ==================== */
+        const ADMIN_PASSWORD = "mahinaktabokachoda221221!!";
+
+        function openAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+            document.getElementById('adminPasswordInput').focus();
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+            document.getElementById('adminAuthError').classList.add('hidden');
+        }
+
+        function verifyAdminPassword(e) {
+            e.preventDefault();
+            const input = document.getElementById('adminPasswordInput').value;
+            if (input === ADMIN_PASSWORD) {
+                closeAdminAuthModal();
+                document.getElementById('adminPasswordInput').value = '';
+                openAdminDashboard();
+            } else {
+                document.getElementById('adminAuthError').classList.remove('hidden');
+            }
+        }
+
+        function openAdminDashboard() {
+            renderAdminDashboardStats();
+            renderAdminOrders();
+            renderAdminInventory();
+            renderAdminCategories();
+            initSalesChart();
+            renderAllPeriodsAnalytics();
+            document.getElementById('adminDashboard').classList.remove('hidden');
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('adminDashboard').classList.add('hidden');
+        }
+
+        function renderAdminDashboardStats() {
+            document.getElementById('statTotalOrders').innerText = orders.length;
+            document.getElementById('statPendingOrders').innerText = orders.filter(o => o.status === 'Pending').length;
+
+            const verifiedList = orders.filter(o => o.status === 'Accepted');
+            document.getElementById('statVerifiedOrders').innerText = verifiedList.length;
+
+            const totalEarnings = verifiedList.reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('statTotalEarnings').innerText = `${totalEarnings.toLocaleString()} BDT`;
+        }
+
+        function calculatePeriodEarnings(days) {
+            const now = Date.now();
+            const msLimit = days * 24 * 60 * 60 * 1000;
+            const accepted = orders.filter(o => o.status === 'Accepted' && (now - o.timestamp) <= msLimit);
+            return {
+                count: accepted.length,
+                total: accepted.reduce((sum, o) => sum + o.total, 0)
+            };
+        }
+
+        function renderAllPeriodsAnalytics() {
+            const periods = [
+                { label: '1 Day', days: 1, key: '1d', color: 'border-neon-cyan text-neon-cyan' },
+                { label: '3 Days', days: 3, key: '3d', color: 'border-blue-500 text-blue-400' },
+                { label: '7 Days', days: 7, key: '7d', color: 'border-neon-lime text-neon-lime' },
+                { label: '15 Days', days: 15, key: '15d', color: 'border-yellow-500 text-yellow-400' },
+                { label: '1 Month', days: 30, key: '1m', color: 'border-purple-500 text-purple-400' },
+                { label: '6 Months', days: 180, key: '6m', color: 'border-pink-500 text-pink-400' },
+                { label: '1 Year', days: 365, key: '1y', color: 'border-neon-gold text-neon-gold' }
+            ];
+
+            const container = document.getElementById('allPeriodsContainer');
+            if (!container) return;
+
+            container.innerHTML = periods.map(p => {
+                const data = calculatePeriodEarnings(p.days);
+                return `
+                    <div class="bg-dark-800/90 p-3 rounded-xl border ${p.color} bg-opacity-30 space-y-1 text-center">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider block text-gray-400">${p.label}</span>
+                        <span class="text-base font-black block text-white">${data.total.toLocaleString()} BDT</span>
+                        <span class="text-[10px] block text-gray-400 font-semibold">${data.count} Accepted Orders</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminOrders() {
+            const tbody = document.getElementById('adminOrdersTable');
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-500 italic">No incoming orders yet. Ready for handover.</td></tr>`;
+                renderAdminDashboardStats();
+                renderAllPeriodsAnalytics();
+                return;
+            }
+
+            tbody.innerHTML = orders.map(o => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="p-3">
+                        <span class="font-bold text-neon-cyan block">#${o.id}</span>
+                        <span class="text-[10px] text-gray-500">${o.dateStr}</span>
+                    </td>
+                    <td class="p-3">
+                        <span class="font-bold text-white block">${o.name}</span>
+                        <span class="text-neon-lime block font-mono"><i class="fa-solid fa-phone"></i> ${o.phone}</span>
+                        <span class="text-[10px] text-gray-400 block">${o.address}</span>
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${o.location === 'outside' ? 'bg-orange-950 text-orange-400' : 'bg-blue-950 text-blue-400'}">
+                            ${o.location === 'outside' ? 'Outside Dhaka (150 BDT)' : 'Inside Dhaka (80 BDT)'}
+                        </span>
+                    </td>
+                    <td class="p-3 max-w-xs">
+                        ${o.items.map(i => `<div class="truncate">• ${i.title} (${i.size}) x${i.qty}</div>`).join('')}
+                    </td>
+                    <td class="p-3">
+                        <span class="font-bold block ${o.paymentMethod === 'bKash' ? 'text-neon-magenta' : 'text-gray-300'}">
+                            ${o.paymentMethod}
+                        </span>
+                        ${o.paymentMethod === 'bKash' ? `
+                            <div class="text-[10px] text-pink-300">
+                                Sender: ${o.bkashSender}<br>
+                                TrxID: <span class="font-mono text-white font-bold">${o.bkashTrx}</span>
+                            </div>
+                        ` : ''}
+                    </td>
+                    <td class="p-3 font-black text-neon-lime">${o.total.toLocaleString()} BDT</td>
+                    <td class="p-3 space-y-1">
+                        <span class="px-2 py-1 rounded text-[10px] font-extrabold uppercase block text-center ${o.status === 'Accepted' ? 'bg-neon-lime/20 text-neon-lime border border-neon-lime/40' : 'bg-yellow-950 text-yellow-400 border border-yellow-500/40'}">
+                            ${o.status === 'Accepted' ? 'ACCEPTED & VERIFIED' : 'PENDING'}
+                        </span>
+                        <div class="flex gap-1 pt-1">
+                            <button onclick="acceptOrder('${o.id}')" class="px-2.5 py-1 bg-neon-lime/20 hover:bg-neon-lime text-neon-lime hover:text-dark-900 border border-neon-lime/40 rounded text-[10px] font-bold transition-all">
+                                ${o.status === 'Accepted' ? 'Revoke' : 'Accept Order'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            renderAdminDashboardStats();
+            renderAllPeriodsAnalytics();
+            updateSalesChart();
+        }
+
+        function acceptOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                if (order.status === 'Accepted') {
+                    order.status = 'Pending';
+                } else {
+                    order.status = 'Accepted';
+                }
+                localStorage.setItem('xs_orders', JSON.stringify(orders));
+                renderAdminOrders();
+            }
+        }
+
+        /* ==================== CONSOLIDATED CHART.JS SALES ANALYTICS ==================== */
+        function initSalesChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if (salesChartInstance) salesChartInstance.destroy();
+
+            salesChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1 Day', '3 Days', '7 Days', '15 Days', '1 Month', '6 Months', '1 Year'],
+                    datasets: [{
+                        label: 'Total Sales Earnings (BDT)',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(0, 243, 255, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(0, 255, 102, 0.7)',
+                            'rgba(234, 179, 8, 0.7)',
+                            'rgba(168, 85, 247, 0.7)',
+                            'rgba(236, 72, 153, 0.7)',
+                            'rgba(255, 183, 0, 0.7)'
+                        ],
+                        borderColor: '#00f3ff',
+                        borderWidth: 1,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        y: {
+                            ticks: { color: '#00ff66', font: { size: 10 } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            updateSalesChart();
+        }
+
+        function updateSalesChart() {
+            if (!salesChartInstance) return;
+
+            const periodDays = [1, 3, 7, 15, 30, 180, 365];
+            const dataValues = periodDays.map(days => calculatePeriodEarnings(days).total);
+
+            salesChartInstance.data.datasets[0].data = dataValues;
+            salesChartInstance.update();
+        }
+
+        /* ==================== PRODUCT INVENTORY & ADD ==================== */
+        function setupAdminCategorySelect() {
+            const select = document.getElementById('pCategory');
+            select.innerHTML = categories.filter(c => c !== 'All Kits').map(c => `
+                <option value="${c}">${c}</option>
+            `).join('');
+        }
+
+        function renderAdminInventory() {
+            const container = document.getElementById('adminInventoryList');
+            document.getElementById('productCounterText').innerText = `${products.length} Items Listed`;
+
+            container.innerHTML = products.map(p => `
+                <div class="flex items-center justify-between bg-dark-800 p-3 rounded-xl border border-white/10">
+                    <div class="flex items-center gap-3">
+                        <img src="${p.images[0]}" class="w-12 h-12 rounded-lg object-cover">
+                        <div>
+                            <h4 class="font-bold text-white text-xs">${p.title}</h4>
+                            <span class="text-[10px] text-neon-cyan font-bold">${p.category} | Offer: ${p.discountPrice} BDT (Reg: ${p.regularPrice})</span>
+                        </div>
+                    </div>
+                    <button onclick="deleteProduct(${p.id})" class="px-3 py-1.5 bg-neon-magenta/20 hover:bg-neon-magenta text-neon-magenta hover:text-white rounded-lg text-xs font-bold transition-colors">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function handleAddNewProduct(e) {
+            e.preventDefault();
+            const title = document.getElementById('pTitle').value.trim();
+            const category = document.getElementById('pCategory').value;
+            const stock = parseInt(document.getElementById('pStock').value);
+            const regularPrice = parseInt(document.getElementById('pRegularPrice').value);
+            const discountPrice = parseInt(document.getElementById('pDiscountPrice').value);
+            const imagesRaw = document.getElementById('pImages').value.trim();
+            const desc = document.getElementById('pDesc').value.trim();
+
+            const imageArray = imagesRaw.split(',').map(url => url.trim()).filter(url => url.length > 0);
+            const sizeBoxes = document.querySelectorAll('input[name="pSize"]:checked');
+            const sizes = Array.from(sizeBoxes).map(cb => cb.value);
+
+            if (imageArray.length === 0) {
+                alert('Please provide at least 1 image URL!');
+                return;
+            }
+
+            const newProd = {
+                id: Date.now(),
+                title: title,
+                category: category,
+                regularPrice: regularPrice,
+                discountPrice: discountPrice,
+                images: imageArray,
+                sizes: sizes.length > 0 ? sizes : ['S', 'M', 'L', 'XL'],
+                stock: stock,
+                description: desc || 'High performance moisture-wicking jersey.'
+            };
+
+            products.unshift(newProd);
+            localStorage.setItem('xs_products', JSON.stringify(products));
+
+            document.getElementById('addProductForm').reset();
+            alert('New product added successfully!');
+
+            renderProducts();
+            renderAdminInventory();
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Delete this product from storefront?')) {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('xs_products', JSON.stringify(products));
+                renderProducts();
+                renderAdminInventory();
+            }
+        }
+
+        /* ==================== CATEGORIES MANAGER ==================== */
+        function renderAdminCategories() {
+            const container = document.getElementById('adminCategoryTags');
+            container.innerHTML = categories.map(cat => `
+                <span class="px-3 py-1 rounded-lg bg-dark-800 border border-white/10 text-xs text-white flex items-center gap-2">
+                    ${cat}
+                    ${cat !== 'All Kits' ? `<button onclick="removeCategory('${cat}')" class="text-neon-magenta hover:text-white"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                </span>
+            `).join('');
+
+            setupAdminCategorySelect();
+        }
+
+        function addCategory() {
+            const input = document.getElementById('newCatInput').value.trim();
+            if (input && !categories.includes(input)) {
+                categories.push(input);
+                localStorage.setItem('xs_categories', JSON.stringify(categories));
+                document.getElementById('newCatInput').value = '';
+                renderCategoryPills();
+            }
+        }
+
+        function removeCategory(cat) {
+            categories = categories.filter(c => c !== cat);
+            localStorage.setItem('xs_categories', JSON.stringify(categories));
+            renderCategoryPills();
+        }
+    </script>
+</body>
+</html>
